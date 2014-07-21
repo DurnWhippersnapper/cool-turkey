@@ -1,21 +1,41 @@
 extern crate num;
 use num::complex::Complex;
 use std::num::Zero;
+use std::num::One;
+use std::num::FromPrimitive;
+
+/*
+trait MultipliesComplex<A>
+{
+    fn complex_mult<A>(&self, rhs: &Complex<A>) -> Complex<A>;
+}
+
+impl<A: Clone + Num> MultipliesComplex<A> for Complex<A>
+{
+    fn complex_mult<A>(&self, rhs: &Complex<A>)
+    {
+        self * rhs
+    }
+}
+*/
 
 /*
     Regular O(n^2) DFT calculation
 */
-pub fn dft(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
+pub fn dft<T: Num + Clone + FloatMath + FromPrimitive, U: Mul<Complex<T>, Complex<T>> >(signal: &[U], spectrum: &mut [Complex<T>])
 {
     for (k, spec_bin) in spectrum.mut_iter().enumerate()
     {
-        let mut sum: Complex<f32> = Zero::zero();
-        let mut angle = 0f32;
-        let rad_per_sample = (k as f32) * Float::two_pi() / (signal.len() as f32);
-        for &x in signal.iter()
+        let mut sum: Complex<T> = Zero::zero();
+        let mut angle: T = Zero::zero();
+        // TODO figure out how to make this generic
+        //let rad_per_sample = k * Float::two_pi() / signal.len();
+        let rad_per_sample : T = One::one();
+        for x in signal.iter()
         {
-            let twiddle: Complex<f32> = Complex::from_polar(&1f32, &angle);
-            sum = sum + twiddle * x;
+            let one: T = One::one();
+            let twiddle: Complex<T> = Complex::from_polar(&one, &angle);
+            sum = sum + (*x) * twiddle;
             angle = angle - rad_per_sample;
         }
         *spec_bin = sum;
