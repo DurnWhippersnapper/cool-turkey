@@ -3,6 +3,9 @@ use num::complex::Complex;
 use std::num::Zero;
 use std::iter::Repeat;
 
+#[cfg(test)]
+mod test_turkey;
+
 fn factor(n: uint) -> Vec<uint>
 {
     let mut factors: Vec<uint> = Vec::new();
@@ -64,7 +67,6 @@ fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], str
 
         for (i, chunk) in spectrum_chunks.enumerate()
         {
-            println!("{0}, {1}", i, chunk);
             cooley_tukey_base(chunk, spectrum.mut_slice_from(i), stride, n2 * stride);
         }
 
@@ -108,110 +110,4 @@ pub fn dft(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
         }
         *spec_bin = sum;
     }
-}
-
-/*
-    Testing
-*/
-fn sse_vectors(vec1: &[Complex<f32>], vec2: &[Complex<f32>]) -> f32
-{
-    let mut sse = 0f32;
-    for (&a, &b) in vec1.iter().zip(vec2.iter())
-    {
-        sse = sse + (a - b).norm();
-    }
-    return sse;
-}
-
-#[test]
-fn dft_test()
-{
-
-    let signal = vec![Complex{re: 1f32, im: 0f32},
-                      Complex{re:-1f32, im: 0f32}];
-    let mut spectrum = signal.to_owned();
-    dft(signal.as_slice(), spectrum.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum.as_slice(), vec![Complex{re: 0f32, im: 0f32}, 
-                                                      Complex{re: 2f32, im: 0f32}].as_slice()));
-
-    let signal = vec![Complex{re: 1f32, im: 1f32},
-                      Complex{re: 2f32, im:-3f32},
-                      Complex{re:-1f32, im: 4f32}];
-    let mut spectrum = signal.to_owned();
-    dft(signal.as_slice(), spectrum.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum.as_slice(), vec![Complex{re: 2f32, im: 2f32}, 
-                                                      Complex{re: -5.562177f32, im: -2.098076f32},
-                                                      Complex{re: 6.562178f32, im: 3.09807f32}].as_slice()));
-
-    let signal = vec![Complex{re: 1f32, im: 1f32},
-                      Complex{re: 2f32, im: 2f32},
-                      Complex{re: 3f32, im: 3f32},
-                      Complex{re: 4f32, im: 4f32},
-                      Complex{re: 5f32, im: 5f32},
-                      Complex{re: 6f32, im: 6f32}];
-    let mut spectrum = signal.to_owned();
-    dft(signal.as_slice(), spectrum.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum.as_slice(), vec![Complex{re: 21f32, im: 21f32}, 
-                                                      Complex{re: -8.16f32, im: 2.16f32},
-                                                      Complex{re: -4.76f32, im: -1.24f32},
-                                                      Complex{re: -3f32, im: -3f32},
-                                                      Complex{re: -1.24f32, im: -4.76f32},
-                                                      Complex{re: 2.16f32, im: -8.16f32}].as_slice()));
-
-    let signal = vec![Complex{re: 0f32, im: 1f32},
-                      Complex{re: 2.5f32, im:-3f32},
-                      Complex{re:-1f32, im: -1f32},
-                      Complex{re: 4f32, im: 0f32}];
-    let mut spectrum = signal.to_owned();
-    dft(signal.as_slice(), spectrum.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum.as_slice(), vec![Complex{re: 5.5f32, im: -3f32}, 
-                                                      Complex{re: -2f32, im: 3.5f32},
-                                                      Complex{re: -7.5f32, im: 3f32},
-                                                      Complex{re: 4f32, im: 0.5f32}].as_slice()));
-
-}
-
-#[test]
-fn cooley_tukey_test_4()
-{
-    let signal = vec![Complex{re: 0f32, im: 1f32},
-                      Complex{re: 2.5f32, im:-3f32},
-                      Complex{re:-1f32, im: -1f32},
-                      Complex{re: 4f32, im: 0f32}];
-    let mut spectrum_dft = signal.to_owned();
-    let mut spectrum_ct = signal.to_owned();
-    dft(signal.as_slice(), spectrum_dft.as_mut_slice());
-    cooley_tukey(signal.as_slice(), spectrum_ct.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum_dft.as_slice(),
-                               spectrum_ct.as_slice()));
-}
-
-#[test]
-fn cooley_tukey_test_6()
-{
-    let signal = vec![Complex{re: 1f32, im: 1f32},
-                      Complex{re: 2f32, im: 2f32},
-                      Complex{re: 3f32, im: 3f32},
-                      Complex{re: 4f32, im: 4f32},
-                      Complex{re: 5f32, im: 5f32},
-                      Complex{re: 6f32, im: 6f32}];
-    let mut spectrum_dft = signal.to_owned();
-    let mut spectrum_ct = signal.to_owned();
-    dft(signal.as_slice(), spectrum_dft.as_mut_slice());
-    cooley_tukey(signal.as_slice(), spectrum_ct.as_mut_slice());
-    assert!(1f32 > sse_vectors(spectrum_dft.as_slice(),
-                               spectrum_ct.as_slice()));
-}
-
-#[test]
-fn cooley_tukey_test_nofactor()
-{
-    let signal = vec![Complex{re: 0f32, im: 1f32},
-                      Complex{re:-1f32, im:-1f32},
-                      Complex{re: 4f32, im: 0f32}];
-    let mut spectrum_dft = signal.to_owned();
-    let mut spectrum_ct = signal.to_owned();
-    dft(signal.as_slice(), spectrum_dft.as_mut_slice());
-    cooley_tukey(signal.as_slice(), spectrum_ct.as_mut_slice());
-    assert_eq!(spectrum_dft, spectrum_ct);
 }
