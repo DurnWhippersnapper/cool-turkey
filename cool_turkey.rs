@@ -54,7 +54,7 @@ fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], str
     else
     {
         let n1 = factors[0];
-        let n2 = signal.len() / n1;
+        let n2 = signal.len() / n1 / stride;
         for i in range(0, n1)
         {
             cooley_tukey_work(signal.slice_from(i), spectrum.mut_slice_from(i), stride * n1, factors.slice_from(1));
