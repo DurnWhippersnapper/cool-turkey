@@ -4,6 +4,9 @@ use std::mem;
 use std::mem::transmute;
 use std::slice::Items;
 
+#[cfg(test)]
+mod stride_items_test;
+
 pub struct StrideItems<'a, T>
 {
     ptr: *const T,
@@ -109,6 +112,7 @@ fn add_mut_stride<'a, T>(orig: & MutStrideItems<'a, T>, stride: uint) -> MutStri
 }
 
 // Creating StrideItems from Slices
+// should we take an offset as well?
 fn stride<'a, T>(items: &[T], stride: uint) -> StrideItems<'a, T>
 {
     unsafe
