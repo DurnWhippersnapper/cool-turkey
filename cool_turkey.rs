@@ -10,13 +10,11 @@ pub fn dft(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
     for (k, spec_bin) in spectrum.mut_iter().enumerate()
     {
         let mut sum: Complex<f32> = Zero::zero();
-        let mut angle = 0f32;
-        let rad_per_sample = (k as f32) * Float::two_pi() / (signal.len() as f32);
-        for &x in signal.iter()
+        for (i, &x) in signal.iter().enumerate()
         {
+            let angle = -1f32 * (i as f32) * (k as f32) * Float::two_pi() / (signal.len() as f32);
             let twiddle: Complex<f32> = Complex::from_polar(&1f32, &angle);
             sum = sum + twiddle * x;
-            angle = angle - rad_per_sample;
         }
         *spec_bin = sum;
     }
