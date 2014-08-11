@@ -6,6 +6,7 @@ use std::iter::Repeat;
 #[cfg(test)]
 mod test_turkey;
 
+//TODO we can do better than this
 fn factor(n: uint) -> Vec<uint>
 {
     let mut factors: Vec<uint> = Vec::new();
@@ -47,6 +48,7 @@ fn multiply_by_twiddles(xs: &mut [Complex<f32>], stride: uint, n1: uint, n2: uin
 
 fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], stride: uint, factors: &[uint])
 {
+    //TODO do fancy pattern matching on factors
     if factors.len() == 1
     {
         cooley_tukey_base(signal, spectrum, stride, stride);
@@ -54,25 +56,28 @@ fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], str
     else
     {
         let n1 = factors[0];
-        let n2 = signal.len() / n1 / stride;
+        //TODO get rid of the ceiling stuff
+        let n2 = ((signal.len() as f32) / (n1 as f32) / (stride as f32)).ceil() as uint;
         for i in range(0, n1)
         {
-            cooley_tukey_work(signal.slice_from(i), spectrum.mut_slice_from(i), stride * n1, factors.slice_from(1));
+            cooley_tukey_work(signal.slice_from(i * stride), spectrum.mut_slice_from(i * stride), stride * n1, factors.slice_from(1));
         }
 
         multiply_by_twiddles(spectrum, stride, n1, n2);
 
+        //TODO do one big malloc in cooley_tukey(), instead of a bunch of copies here
         let spectrum_copy = spectrum.to_owned();
         let spectrum_chunks = spectrum_copy.as_slice().chunks(stride * n1);
 
         for (i, chunk) in spectrum_chunks.enumerate()
         {
-            cooley_tukey_base(chunk, spectrum.mut_slice_from(i), stride, n2 * stride);
+            cooley_tukey_base(chunk, spectrum.mut_slice_from(i * stride), stride, n2 * stride);
         }
 
     }
 }
 
+//TODO make this the function as dft() with use of iterators and generics
 fn cooley_tukey_base(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], signal_stride: uint, spectrum_stride: uint)
 {
     let idxs = std::iter::range_step(0, spectrum.len(), spectrum_stride);
