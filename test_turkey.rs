@@ -16,7 +16,7 @@ fn compare_vectors(vec1: &[Complex<f32>], vec2: &[Complex<f32>]) -> bool
 
 fn test_dft_correct(signal: &[Complex<f32>], spectrum: &[Complex<f32>]) -> bool
 {
-    let mut test_spectrum = signal.to_owned();
+    let mut test_spectrum = signal.to_vec();
     dft(signal, test_spectrum.as_mut_slice());
     return compare_vectors(spectrum, test_spectrum.as_slice());
 }
@@ -70,8 +70,8 @@ fn dft_test()
 
 fn ct_matches_dft(signal: &[Complex<f32>]) -> bool
 {
-    let mut spectrum_dft = signal.to_owned();
-    let mut spectrum_ct = signal.to_owned();
+    let mut spectrum_dft = signal.to_vec();
+    let mut spectrum_ct = signal.to_vec();
     dft(signal, spectrum_dft.as_mut_slice());
     cooley_tukey(signal, spectrum_ct.as_mut_slice());
     return compare_vectors(spectrum_dft.as_slice(), spectrum_ct.as_slice());
