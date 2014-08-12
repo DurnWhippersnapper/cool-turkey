@@ -11,7 +11,7 @@ fn compare_vectors(vec1: &[Complex<f32>], vec2: &[Complex<f32>]) -> bool
     {
         sse = sse + (a - b).norm();
     }
-    return sse < 1f32;
+    return (sse / vec1.len() as f32) < 0.1f32;
 }
 
 fn test_dft_correct(signal: &[Complex<f32>], spectrum: &[Complex<f32>]) -> bool
