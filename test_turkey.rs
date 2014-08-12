@@ -92,9 +92,9 @@ fn random_signal(length: uint) -> Vec<Complex<f32>>
 #[test]
 fn test_cooley_tukey()
 {
-    for len in range(2u, 25)
+    for len in range(2u, 100)
     {
         let signal = random_signal(len);
-        assert!(ct_matches_dft(signal.as_slice()));
+        assert!(ct_matches_dft(signal.as_slice()), "length = {}", len);
     }
 }

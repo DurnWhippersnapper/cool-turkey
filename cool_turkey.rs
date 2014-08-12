@@ -31,7 +31,7 @@ pub fn cooley_tukey(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
     let factors = factor(signal.len());
     let mut temp: Vec<Complex<f32>> = Vec::new();
     temp.grow(signal.len(), &Zero::zero());
-    cooley_tukey_work(signal, spectrum, temp.as_mut_slice(), 1, factors.as_slice());
+    cooley_tukey_work(signal, spectrum, temp.as_mut_slice(), 1, 0, factors.as_slice());
 }
 
 fn multiply_by_twiddles(xs: &mut [Complex<f32>], stride: uint, n1: uint, n2: uint)
@@ -48,28 +48,28 @@ fn multiply_by_twiddles(xs: &mut [Complex<f32>], stride: uint, n1: uint, n2: uin
     }
 }
 
-fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], temp: &mut [Complex<f32>], stride: uint, factors: &[uint])
+fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], temp: &mut [Complex<f32>],
+                     stride: uint, starting_idx: uint, factors: &[uint])
 {
     //TODO do fancy pattern matching on factors
     if factors.len() == 1
     {
-        cooley_tukey_base(signal, spectrum, stride, stride);
+        cooley_tukey_base(signal.slice_from(starting_idx), spectrum.mut_slice_from(starting_idx), stride, stride);
     }
     else
     {
         let n1 = factors[0];
-        //TODO get rid of the ceiling stuff
-        let n2 = ((signal.len() as f32) / (n1 as f32) / (stride as f32)).ceil() as uint;
+        let n2 = signal.len() / n1 / stride;
         for i in range(0, n1)
         {
-            cooley_tukey_work(signal.slice_from(i * stride), temp.mut_slice_from(i * stride), spectrum.mut_slice_from(i * stride), stride * n1, factors.slice_from(1));
+            cooley_tukey_work(signal.as_slice(), temp.as_mut_slice(), spectrum.as_mut_slice(), stride * n1, stride * i + starting_idx,  factors.slice_from(1));
         }
 
-        multiply_by_twiddles(temp, stride, n1, n2);
+        multiply_by_twiddles(temp.mut_slice_from(starting_idx), stride, n1, n2);
 
-        for (i, chunk) in temp.chunks(stride * n1).enumerate()
+        for (i, chunk) in temp.mut_slice_from(starting_idx).chunks(stride * n1).enumerate()
         {
-            cooley_tukey_base(chunk, spectrum.mut_slice_from(i * stride), stride, n2 * stride);
+            cooley_tukey_base(chunk, spectrum.mut_slice_from(i * stride + starting_idx), stride, n2 * stride);
         }
 
     }
