@@ -1,8 +1,10 @@
 extern crate num;
+extern crate rust_fft;
+
 use num::complex::Complex;
 use std::rand;
 use std::rand::distributions::{Normal, IndependentSample};
-use super::{dft, cooley_tukey};
+use rust_fft::{dft, cooley_tukey};
 
 fn compare_vectors(vec1: &[Complex<f32>], vec2: &[Complex<f32>]) -> bool
 {

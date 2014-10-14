@@ -3,9 +3,6 @@ use num::complex::Complex;
 use std::num::Zero;
 use std::iter::Repeat;
 
-#[cfg(test)]
-mod test_turkey;
-
 //TODO we can do better than this
 fn factor(n: uint) -> Vec<uint>
 {
@@ -30,7 +27,7 @@ pub fn cooley_tukey(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
 {
     let factors = factor(signal.len());
     let mut temp: Vec<Complex<f32>> = Vec::new();
-    temp.grow(signal.len(), &Zero::zero());
+    temp.grow(signal.len(), Zero::zero());
     cooley_tukey_work(signal, spectrum, temp.as_mut_slice(), 1, factors.as_slice());
 }
 
@@ -62,14 +59,14 @@ fn cooley_tukey_work(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], tem
         let n2 = ((signal.len() as f32) / (n1 as f32) / (stride as f32)).ceil() as uint;
         for i in range(0, n1)
         {
-            cooley_tukey_work(signal.slice_from(i * stride), temp.mut_slice_from(i * stride), spectrum.mut_slice_from(i * stride), stride * n1, factors.slice_from(1));
+            cooley_tukey_work(signal.slice_from(i * stride), temp.slice_from_mut(i * stride), spectrum.slice_from_mut(i * stride), stride * n1, factors.slice_from(1));
         }
 
         multiply_by_twiddles(temp, stride, n1, n2);
 
         for (i, chunk) in temp.chunks(stride * n1).enumerate()
         {
-            cooley_tukey_base(chunk, spectrum.mut_slice_from(i * stride), stride, n2 * stride);
+            cooley_tukey_base(chunk, spectrum.slice_from_mut(i * stride), stride, n2 * stride);
         }
 
     }
@@ -100,7 +97,7 @@ fn cooley_tukey_base(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>], sig
 */
 pub fn dft(signal: &[Complex<f32>], spectrum: &mut [Complex<f32>])
 {
-    for (k, spec_bin) in spectrum.mut_iter().enumerate()
+    for (k, spec_bin) in spectrum.iter_mut().enumerate()
     {
         let mut sum: Complex<f32> = Zero::zero();
         let mut angle = 0f32;
