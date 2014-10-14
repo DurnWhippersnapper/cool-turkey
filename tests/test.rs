@@ -13,7 +13,7 @@ fn compare_vectors(vec1: &[Complex<f32>], vec2: &[Complex<f32>]) -> bool
     {
         sse = sse + (a - b).norm();
     }
-    return sse < 1f32;
+    return (sse / vec1.len() as f32) < 0.1f32;
 }
 
 fn test_dft_correct(signal: &[Complex<f32>], spectrum: &[Complex<f32>]) -> bool
@@ -94,9 +94,9 @@ fn random_signal(length: uint) -> Vec<Complex<f32>>
 #[test]
 fn test_cooley_tukey()
 {
-    for len in range(2u, 25)
+    for len in range(2u, 100)
     {
         let signal = random_signal(len);
-        assert!(ct_matches_dft(signal.as_slice()));
+        assert!(ct_matches_dft(signal.as_slice()), "length = {}", len);
     }
 }
